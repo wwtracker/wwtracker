@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wolvesville Game Tracker</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            background-color: #1A4D2E;
+            color: #F5EFE6;
+        }
+        .container {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #4F6F52;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #F5EFE6;
+        }
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 10px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            background-color: #E8DFCA;
+            color: #1A4D2E;
+        }
+        button {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+            background-color: #E8DFCA;
+            color: #1A4D2E;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            margin-left: 5px;
+            display: inline-block;
+        }
+        button:hover {
+            background-color: #4F6F52;
+        }
+        .ranking {
+            background-color: #4F6F52;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .werewolf-section {
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            background-color: #1A4D2E;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .win-section {
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            background-color: #1A4D2E;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .ranking h2 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #F5EFE6;
+        }
+        .player {
+            margin-bottom: 5px;
+            font-size: 16px;
+            color: #F5EFE6;
+        }
+        .player b {
+            font-weight: bold;
+            color: #F5EFE6;
+        }
+        .top3 {
+            margin-bottom: 20px;
+        }
+        .top3 h2 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-align: center;
+            color: #F5EFE6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Wolvesville Game Tracker</h1>
+
+    <div class="werewolf-section">
+        
+
+        <label for="werewolves">Enter werewolf player numbers (space-separated):</label>
+        <input type="text" id="werewolves" placeholder="E.g., 1 3 6">
+
+        <button onclick="addWerewolves()">Add</button>
+
+        <div class="ranking">
+            <h2>Werewolf Ranking</h2>
+            <div id="werewolfRanking" class="players">
+                <!-- Werewolf ranking will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="win-section">
+        
+
+        <label for="winners">Enter winner player numbers (space-separated):</label>
+        <input type="text" id="winners" placeholder="E.g., 2 5">
+
+        <button onclick="addWinners()">Add</button>
+
+        <div class="ranking">
+            <h2>Winners Ranking</h2>
+            <div id="winnersRanking" class="players">
+                <!-- Winners ranking will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <button onclick="restartTable()">Restart Table</button>
+</div>
+
+<script>
+    // Function to add werewolf counts for the specified players
+    function addWerewolves() {
+        var werewolvesInput = document.getElementById('werewolves').value;
+        var werewolves = werewolvesInput.split(' ').map(function(item) {
+            return parseInt(item.trim());
+        });
+
+        // Validate player numbers
+        if (werewolves.some(isNaN) || werewolves.some(function(num) { return num < 1 || num > 16; })) {
+            alert("Please enter valid player numbers (1-16) separated by spaces.");
+            return;
+        }
+
+        // Increment werewolf count for each player
+        werewolves.forEach(function(playerNumber) {
+            var werewolfCount = localStorage.getItem('werewolfCount' + playerNumber) || 0;
+            werewolfCount++;
+            localStorage.setItem('werewolfCount' + playerNumber, werewolfCount);
+        });
+
+        updateWerewolfRanking();
+        updateTopWerewolves();
+        document.getElementById('werewolves').value = ""; // Clear input field
+    }
+
+    // Function to add win counts for the specified players
+    function addWinners() {
+        var winnersInput = document.getElementById('winners').value;
+        var winners = winnersInput.split(' ').map(function(item) {
+            return parseInt(item.trim());
+        });
+
+        // Validate player numbers
+        if (winners.some(isNaN) || winners.some(function(num) { return num < 1 || num > 16; })) {
+            alert("Please enter valid player numbers (1-16) separated by spaces.");
+            return;
+        }
+
+        // Increment win count for each player
+        winners.forEach(function(playerNumber) {
+            var winCount = localStorage.getItem('winCount' + playerNumber) || 0;
+            winCount++;
+            localStorage.setItem('winCount' + playerNumber, winCount);
+        });
+
+        updateWinnersRanking();
+        updateTopWinners();
+        document.getElementById('winners').value = ""; // Clear input field
+    }
+
+    // Function to update the werewolf ranking based on stored werewolf counts
+    function updateWerewolfRanking() {
+        var werewolfRanking = document.getElementById('werewolfRanking');
+        werewolfRanking.innerHTML = ''; // Clear previous ranking
+
+        // Get werewolf counts for all players from localStorage
+        var playerCounts = [];
+        for (var i = 1; i <= 16; i++) {
+            var count = parseInt(localStorage.getItem('werewolfCount' + i)) || 0;
+            playerCounts.push({ playerNumber: i, count: count });
+        }
+
+        // Sort players based on werewolf counts in ascending order
+        playerCounts.sort(function(a, b) {
+            return a.count - b.count;
+        });
+
+        // Update werewolf ranking
+        playerCounts.forEach(function(player) {
+            var playerElement = document.createElement('div');
+            playerElement.classList.add('player');
+            playerElement.innerHTML = '<b>Player ' + player.playerNumber + ':</b> ' + player.count + ' times';
+            var minusButton = document.createElement('button');
+            minusButton.textContent = '-';
+            minusButton.onclick = function() { decrementCount('werewolf', player.playerNumber); };
+            var plusButton = document.createElement('button');
+            plusButton.textContent = '+';
+            plusButton.onclick = function() { incrementCount('werewolf', player.playerNumber); };
+            playerElement.appendChild(minusButton);
+            playerElement.appendChild(plusButton);
+            werewolfRanking.appendChild(playerElement);
+        });
+    }
+
+    // Function to update the winners ranking based on stored win counts
+    function updateWinnersRanking() {
+        var winnersRanking = document.getElementById('winnersRanking');
+        winnersRanking.innerHTML = ''; // Clear previous ranking
+
+        // Get win counts for all players from localStorage
+        var playerCounts = [];
+        for (var i = 1; i <= 16; i++) {
+            var count = parseInt(localStorage.getItem('winCount' + i)) || 0;
+            playerCounts.push({ playerNumber: i, count: count });
+        }
+
+        // Sort players based on win counts in descending order
+        playerCounts.sort(function(a, b) {
+            return b.count - a.count;
+        });
+
+        // Update winners ranking
+        playerCounts.forEach(function(player) {
+            var playerElement = document.createElement('div');
+            playerElement.classList.add('player');
+            playerElement.innerHTML = '<b>Player ' + player.playerNumber + ':</b> ' + player.count + ' wins';
+            var minusButton = document.createElement('button');
+            minusButton.textContent = '-';
+            minusButton.onclick = function() { decrementCount('win', player.playerNumber); };
+            var plusButton = document.createElement('button');
+            plusButton.textContent = '+';
+            plusButton.onclick = function() { incrementCount('win', player.playerNumber); };
+            playerElement.appendChild(minusButton);
+            playerElement.appendChild(plusButton);
+            winnersRanking.appendChild(playerElement);
+        });
+    }
+
+    // Function to decrement count for a specific player (win or werewolf)
+    function decrementCount(type, playerNumber) {
+        var key = type === 'win' ? 'winCount' : 'werewolfCount';
+        var count = parseInt(localStorage.getItem(key + playerNumber)) || 0;
+        if (count > 0) {
+            count--;
+            localStorage.setItem(key + playerNumber, count);
+            updateWerewolfRanking();
+            updateWinnersRanking();
+        }
+    }
+
+    // Function to increment count for a specific player (win or werewolf)
+    function incrementCount(type, playerNumber) {
+        var key = type === 'win' ? 'winCount' : 'werewolfCount';
+        var count = parseInt(localStorage.getItem(key + playerNumber)) || 0;
+        count++;
+        localStorage.setItem(key + playerNumber, count);
+        updateWerewolfRanking();
+        updateWinnersRanking();
+    }
+
+    // Function to restart the table by clearing localStorage
+    function restartTable() {
+        if (confirm("Are you sure you want to restart the table? This will clear all data.")) {
+            localStorage.clear();
+            updateWerewolfRanking();
+            updateWinnersRanking();
+            updateTopWerewolves();
+            updateTopWinners();
+        }
+    }
+
+    // Load initial ranking on page load
+    window.onload = function () {
+        updateWerewolfRanking();
+        updateWinnersRanking();
+    };
+</script>
+
+</body>
+</html>
